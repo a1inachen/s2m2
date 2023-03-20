@@ -1,0 +1,21 @@
+std::vector<SafeInterval> Constraints::getSafeIntervals(Node curNode, const std::unordered_multimap<int, Node> &close, int w)
+{
+    std::vector<SafeInterval> intervals(0);
+    auto range = close.equal_range(curNode.i*w + curNode.j);
+    for(unsigned int i = 0; i < safe_intervals[curNode.i][curNode.j].size(); i++)
+        if(safe_intervals[curNode.i][curNode.j][i].end >= curNode.g
+                && safe_intervals[curNode.i][curNode.j][i].begin <= (curNode.Parent->interval.end + curNode.g - curNode.Parent->g))
+        {
+            bool has = false;
+            for(auto it = range.first; it != range.second; it++)
+                if(it->second.interval.begin == safe_intervals[curNode.i][curNode.j][i].begin)
+                if((it->second.g + tweight*fabs(curNode.heading - it->second.heading)/(180*rspeed)) - curNode.g < CN_EPSILON)//take into account turning cost
+                {
+                    has = true;
+                    break;
+                }
+            if(!has)
+                intervals.push_back(safe_intervals[curNode.i][curNode.j][i]);
+        }
+    return intervals;
+}
